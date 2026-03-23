@@ -36,17 +36,15 @@ class NorwegianRewardsMonitor:
                 )
                 page = context.new_page()
                 response = page.goto(PARTNER_URL, wait_until='networkidle', timeout=60000)
-                status = response.status if response else 0
+                # Extra wait for React to finish rendering dynamic content
+                page.wait_for_timeout(3000)
                 html = page.content()
                 browser.close()
 
+            status = response.status if response else 0
             print(f"Page response status: {status}")
-            print(f"Page HTML preview (first 1000 chars):\n{html[:1000]}")
-
-            if status != 200:
-                print(f"❌ Non-200 status ({status}), aborting")
-                return None
-
+            # Note: SPAs often return HTTP 404 for client-side routes — ignore status, check rendered content
+            print(f"Page HTML length: {len(html)} chars")
             return html
         except Exception as e:
             print(f"❌ Error fetching page: {e}")
@@ -74,7 +72,10 @@ class NorwegianRewardsMonitor:
         )
         
         print(f"Found {len(reward_containers)} potential reward containers")
-        
+        # Log first 2 containers so we can see the actual HTML structure
+        for i, c in enumerate(reward_containers[:2]):
+            print(f"  Container {i} HTML (first 500 chars): {str(c)[:500]}")
+
         for container in reward_containers:
             try:
                 reward = {}
