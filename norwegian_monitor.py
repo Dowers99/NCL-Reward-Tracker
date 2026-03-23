@@ -11,6 +11,7 @@ import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
 import hashlib
+from playwright.sync_api import sync_playwright
 
 # Configuration from environment variables
 PARTNER_URL = "https://myvip.co/rewardstore/partner/66"
@@ -21,39 +22,24 @@ STATE_FILE = "rewards_state.json"
 
 class NorwegianRewardsMonitor:
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0'
-        })
-    
+        pass
+
     def fetch_page(self):
-        """Fetch the partner page"""
+        """Fetch the partner page using a real headless browser"""
         try:
-            print(f"Fetching {PARTNER_URL}...")
-            # Small delay to appear more human-like
-            import time
-            time.sleep(2)
-            
-            response = self.session.get(PARTNER_URL, timeout=30)
-            response.raise_for_status()
-            print(f"Page fetched successfully (status: {response.status_code})")
-            return response.text
-        except requests.exceptions.HTTPError as e:
-            print(f"❌ HTTP Error fetching page: {e}")
-            print(f"   Status code: {e.response.status_code if e.response else 'Unknown'}")
-            print(f"   Response text: {e.response.text[:200] if e.response else 'No response'}")
-            return None
+            print(f"Fetching {PARTNER_URL} with Playwright...")
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    locale='en-US',
+                )
+                page = context.new_page()
+                response = page.goto(PARTNER_URL, wait_until='networkidle', timeout=60000)
+                print(f"Page fetched successfully (status: {response.status if response else 'unknown'})")
+                html = page.content()
+                browser.close()
+            return html
         except Exception as e:
             print(f"❌ Error fetching page: {e}")
             return None

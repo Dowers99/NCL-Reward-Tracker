@@ -11,6 +11,7 @@ import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
 import hashlib
+from playwright.sync_api import sync_playwright
 
 # Configuration from environment variables
 PARTNER_URL = "https://myvip.co/rewardstore/partner/66"
@@ -76,33 +77,21 @@ def send_message(text, parse_mode="HTML"):
 
 
 def fetch_current_rewards():
-    """Fetch current rewards from the website"""
+    """Fetch current rewards from the website using a real headless browser"""
     try:
-        session = requests.Session()
-        session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0'
-        })
-        
-        print(f"Fetching {PARTNER_URL}...")
-        # Small delay to appear more human-like
-        import time
-        time.sleep(2)
-        
-        response = session.get(PARTNER_URL, timeout=30)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"Fetching {PARTNER_URL} with Playwright...")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                locale='en-US',
+            )
+            page = context.new_page()
+            page.goto(PARTNER_URL, wait_until='networkidle', timeout=60000)
+            html = page.content()
+            browser.close()
+
+        soup = BeautifulSoup(html, 'html.parser')
         
         # Extract partner name
         partner_name_elem = soup.find('h1') or soup.find('h2')
