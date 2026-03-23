@@ -7,6 +7,7 @@ Listens for commands from Telegram and responds with current reward state
 import requests
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -88,49 +89,49 @@ def fetch_current_rewards():
             )
             page = context.new_page()
             page.goto(PARTNER_URL, wait_until='networkidle', timeout=60000)
+            page.wait_for_timeout(3000)
             html = page.content()
             browser.close()
 
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # Extract partner name
         partner_name_elem = soup.find('h1') or soup.find('h2')
-        partner_name = partner_name_elem.get_text(strip=True) if partner_name_elem else "Unknown"
-        
-        # Find reward containers
+        partner_name = partner_name_elem.get_text(strip=True) if partner_name_elem else "Norwegian Cruises"
+
+        # Find rewards using the same approach as norwegian_monitor.py
         rewards = []
-        reward_containers = (
-            soup.find_all('div', class_=lambda x: x and 'card' in x.lower()) or
-            soup.find_all('div', class_=lambda x: x and 'reward' in x.lower()) or
-            soup.find_all('article')
-        )
-        
-        for container in reward_containers:
+        title_elements = soup.select('[id^="reward-title-"]')
+
+        for title_elem in title_elements:
             try:
-                reward = {}
-                
-                # Extract title
-                title_elem = container.find(['h3', 'h4', 'h5'])
-                if title_elem:
-                    reward['title'] = title_elem.get_text(strip=True)
-                
-                # Extract points
-                points_elem = container.find(string=lambda text: text and any(char.isdigit() for char in text) and (',' in text or len([c for c in text if c.isdigit()]) >= 3))
-                if points_elem:
-                    points_text = ''.join(filter(lambda x: x.isdigit() or x == ',', points_elem))
-                    reward['points'] = points_text
-                
-                # Extract image URL
-                img = container.find('img')
-                if img:
-                    img_src = img.get('src') or img.get('data-src')
-                    if img_src:
-                        if img_src.startswith('//'):
-                            img_src = 'https:' + img_src
-                        elif img_src.startswith('/'):
-                            img_src = 'https://myvip.co' + img_src
-                        reward['image_url'] = img_src
-                
+                reward = {'title': title_elem.get_text(strip=True)}
+
+                container = title_elem.parent
+                for _ in range(6):
+                    if container is None or container.name in ['body', 'html']:
+                        break
+                    if any('cardContent' in c for c in container.get('class', [])):
+                        break
+                    container = container.parent
+
+                if container:
+                    for text_node in container.find_all(string=True):
+                        text = text_node.strip()
+                        if re.match(r'^\d{1,3}(,\d{3})+$', text):
+                            reward['points'] = text
+                            break
+
+                    img = container.find('img')
+                    if img:
+                        img_src = img.get('src') or img.get('data-src')
+                        if img_src:
+                            if img_src.startswith('//'):
+                                img_src = 'https:' + img_src
+                            elif img_src.startswith('/'):
+                                img_src = 'https://myvip.co' + img_src
+                            reward['image_url'] = img_src
+
                 if reward.get('title'):
                     rewards.append(reward)
             except:
