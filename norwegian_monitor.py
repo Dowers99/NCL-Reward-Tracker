@@ -36,9 +36,17 @@ class NorwegianRewardsMonitor:
                 )
                 page = context.new_page()
                 response = page.goto(PARTNER_URL, wait_until='networkidle', timeout=60000)
-                print(f"Page fetched successfully (status: {response.status if response else 'unknown'})")
+                status = response.status if response else 0
                 html = page.content()
                 browser.close()
+
+            print(f"Page response status: {status}")
+            print(f"Page HTML preview (first 1000 chars):\n{html[:1000]}")
+
+            if status != 200:
+                print(f"❌ Non-200 status ({status}), aborting")
+                return None
+
             return html
         except Exception as e:
             print(f"❌ Error fetching page: {e}")
@@ -234,6 +242,10 @@ class NorwegianRewardsMonitor:
             print(f"✓ Telegram notification sent successfully")
             return True
             
+        except requests.exceptions.HTTPError as e:
+            print(f"❌ Telegram HTTP error: {e}")
+            print(f"   Response body: {e.response.text if e.response else 'none'}")
+            return False
         except Exception as e:
             print(f"❌ Error sending Telegram notification: {e}")
             return False
