@@ -7,6 +7,7 @@ Checks partner 66 for Norwegian Cruise Line rewards and notifies via Telegram
 import requests
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -53,76 +54,57 @@ class NorwegianRewardsMonitor:
     def parse_rewards(self, html_content):
         """Parse rewards from the page"""
         soup = BeautifulSoup(html_content, 'html.parser')
-        
+
         # Extract partner name
         partner_name_elem = soup.find('h1') or soup.find('h2')
-        partner_name = partner_name_elem.get_text(strip=True) if partner_name_elem else "Unknown"
-        
+        partner_name = partner_name_elem.get_text(strip=True) if partner_name_elem else "Norwegian Cruises"
         print(f"Partner name found: {partner_name}")
-        
-        # Find all reward cards - based on the screenshot, they're likely in card containers
-        rewards = []
-        
-        # Try various selectors for reward items
-        reward_containers = (
-            soup.find_all('div', class_=lambda x: x and 'card' in x.lower()) or
-            soup.find_all('div', class_=lambda x: x and 'reward' in x.lower()) or
-            soup.find_all('article') or
-            soup.find_all('div', attrs={'data-reward': True})
-        )
-        
-        print(f"Found {len(reward_containers)} potential reward containers")
-        # Log first 2 containers so we can see the actual HTML structure
-        for i, c in enumerate(reward_containers[:2]):
-            print(f"  Container {i} HTML (first 500 chars): {str(c)[:500]}")
 
-        for container in reward_containers:
+        rewards = []
+
+        # Reward titles use id="reward-title-XXXXX" (MUI Typography divs, not h tags)
+        title_elements = soup.select('[id^="reward-title-"]')
+        print(f"Found {len(title_elements)} reward title elements")
+
+        for title_elem in title_elements:
             try:
-                reward = {}
-                
-                # Extract title (e.g., "Comp 7 Night NCL Cruise")
-                title_elem = container.find(['h3', 'h4', 'h5'], class_=lambda x: not x or 'price' not in x.lower())
-                if not title_elem:
-                    # Try any heading
-                    title_elem = container.find(['h1', 'h2', 'h3', 'h4', 'h5'])
-                
-                if title_elem:
-                    reward['title'] = title_elem.get_text(strip=True)
-                
-                # Extract points cost (e.g., "250,000")
-                points_elem = container.find(string=lambda text: text and any(char.isdigit() for char in text) and (',' in text or len([c for c in text if c.isdigit()]) >= 3))
-                if points_elem:
-                    # Clean up the points value
-                    points_text = ''.join(filter(lambda x: x.isdigit() or x == ',', points_elem))
-                    reward['points'] = points_text
-                
-                # Extract image URL
-                img = container.find('img')
-                if img:
-                    img_src = img.get('src') or img.get('data-src')
-                    if img_src:
-                        # Make absolute URL if needed
-                        if img_src.startswith('//'):
-                            img_src = 'https:' + img_src
-                        elif img_src.startswith('/'):
-                            img_src = 'https://myvip.co' + img_src
-                        reward['image_url'] = img_src
-                
-                # Extract location if available
-                location_elem = container.find(string=lambda text: text and 'port' in text.lower())
-                if location_elem:
-                    reward['location'] = location_elem.strip()
-                
-                # Only add if we found at least a title
-                if reward.get('title'):
-                    # Create unique hash for this reward
-                    reward_str = f"{reward.get('title', '')}_{reward.get('points', '')}"
-                    reward['hash'] = hashlib.md5(reward_str.encode()).hexdigest()
-                    rewards.append(reward)
-                    print(f"  ✓ Parsed: {reward['title']} - {reward.get('points', 'N/A')} points")
-            
+                reward = {'title': title_elem.get_text(strip=True)}
+
+                # Walk up to the cardContent container (max 6 levels)
+                container = title_elem.parent
+                for _ in range(6):
+                    if container is None or container.name in ['body', 'html']:
+                        break
+                    if any('cardContent' in c for c in container.get('class', [])):
+                        break
+                    container = container.parent
+
+                if container:
+                    # Points: text matching "250,000" pattern
+                    for text_node in container.find_all(string=True):
+                        text = text_node.strip()
+                        if re.match(r'^\d{1,3}(,\d{3})+$', text):
+                            reward['points'] = text
+                            break
+
+                    # Image
+                    img = container.find('img')
+                    if img:
+                        img_src = img.get('src') or img.get('data-src')
+                        if img_src:
+                            if img_src.startswith('//'):
+                                img_src = 'https:' + img_src
+                            elif img_src.startswith('/'):
+                                img_src = 'https://myvip.co' + img_src
+                            reward['image_url'] = img_src
+
+                reward_str = f"{reward['title']}_{reward.get('points', '')}"
+                reward['hash'] = hashlib.md5(reward_str.encode()).hexdigest()
+                rewards.append(reward)
+                print(f"  ✓ Parsed: {reward['title']} - {reward.get('points', 'N/A')} points")
+
             except Exception as e:
-                print(f"  ⚠ Error parsing reward container: {e}")
+                print(f"  ⚠ Error parsing reward: {e}")
                 continue
         
         return {
@@ -245,7 +227,7 @@ class NorwegianRewardsMonitor:
             
         except requests.exceptions.HTTPError as e:
             print(f"❌ Telegram HTTP error: {e}")
-            print(f"   Response body: {e.response.text if e.response else 'none'}")
+            print(f"   Response body: {e.response.text if e.response is not None else 'none'}")
             return False
         except Exception as e:
             print(f"❌ Error sending Telegram notification: {e}")
