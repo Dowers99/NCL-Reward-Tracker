@@ -3,12 +3,6 @@
   "partner_id": "66",
   "rewards": [
     {
-      "title": "Comp 3-4 Night NCL Cruise",
-      "points": "500,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "77c50c2f89d6f0d97407ddcb0d8578cd"
-    },
-    {
       "title": "Enjoy $200 off at NCL",
       "points": "22,500",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
@@ -69,7 +63,7 @@
       "hash": "77c50c2f89d6f0d97407ddcb0d8578cd"
     }
   ],
-  "reward_count": 11,
-  "timestamp": "2026-05-26T21:52:16.449844",
+  "reward_count": 10,
+  "timestamp": "2026-05-26T23:14:59.933270",
   "url": "https://myvip.co/rewardstore/partner/66"
 }
