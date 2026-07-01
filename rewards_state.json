@@ -4,42 +4,42 @@
   "rewards": [
     {
       "title": "Enjoy $200 off at NCL",
-      "points": "22,500",
+      "points": "45,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "7a5f3b2ad8bc97dcc7a9780e0f69d008"
+      "hash": "cec4e78ea645fedfe8bdf570c101d79e"
     },
     {
       "title": "Enjoy $400 off at NCL",
-      "points": "32,500",
+      "points": "65,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "92f2177c3243986229cb23d3f1855adc"
+      "hash": "7d179d60149d3180ff2581a3eaf6cb93"
     },
     {
       "title": "Enjoy $600 off at NCL",
-      "points": "42,500",
+      "points": "85,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "3975d1debf66c1084955c64d0b555e51"
+      "hash": "292ade51633628c9b8a667539707ae51"
     },
     {
       "title": "Enjoy $200 off at NCL",
-      "points": "22,500",
+      "points": "45,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "7a5f3b2ad8bc97dcc7a9780e0f69d008"
+      "hash": "cec4e78ea645fedfe8bdf570c101d79e"
     },
     {
       "title": "Enjoy $400 off at NCL",
-      "points": "32,500",
+      "points": "65,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "92f2177c3243986229cb23d3f1855adc"
+      "hash": "7d179d60149d3180ff2581a3eaf6cb93"
     },
     {
       "title": "Enjoy $600 off at NCL",
-      "points": "42,500",
+      "points": "85,000",
       "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "3975d1debf66c1084955c64d0b555e51"
+      "hash": "292ade51633628c9b8a667539707ae51"
     }
   ],
   "reward_count": 6,
-  "timestamp": "2026-07-01T04:40:40.728841",
+  "timestamp": "2026-07-01T08:51:58.016762",
   "url": "https://myvip.co/rewardstore/partner/66"
 }
