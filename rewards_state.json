@@ -1,45 +1,8 @@
 {
-  "partner_name": "Norwegian Cruises",
+  "partner_name": "It's your choice!",
   "partner_id": "66",
-  "rewards": [
-    {
-      "title": "Enjoy $200 off at NCL",
-      "points": "45,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "cec4e78ea645fedfe8bdf570c101d79e"
-    },
-    {
-      "title": "Enjoy $400 off at NCL",
-      "points": "65,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "7d179d60149d3180ff2581a3eaf6cb93"
-    },
-    {
-      "title": "Enjoy $600 off at NCL",
-      "points": "85,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "292ade51633628c9b8a667539707ae51"
-    },
-    {
-      "title": "Enjoy $200 off at NCL",
-      "points": "45,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "cec4e78ea645fedfe8bdf570c101d79e"
-    },
-    {
-      "title": "Enjoy $400 off at NCL",
-      "points": "65,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "7d179d60149d3180ff2581a3eaf6cb93"
-    },
-    {
-      "title": "Enjoy $600 off at NCL",
-      "points": "85,000",
-      "image_url": "https://loyaltyweb-a.akamaihd.net/base/icons/v2/icon_coin_lp_v2.png?",
-      "hash": "292ade51633628c9b8a667539707ae51"
-    }
-  ],
-  "reward_count": 6,
-  "timestamp": "2026-07-15T22:07:29.840423",
+  "rewards": [],
+  "reward_count": 0,
+  "timestamp": "2026-07-16T00:04:04.512846",
   "url": "https://myvip.co/rewardstore/partner/66"
 }
